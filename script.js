@@ -168,14 +168,16 @@ function openTrainer(mod) {
   const vocab = mod===1 ? m1Vocab : m2Vocab;
   if (!vocab.length) { alert("Daten noch nicht geladen. Bitte kurz warten."); return; }
   hide("page-menu");
+  // Trainer sayfalarında içerik uzun → flex-start
+  document.body.style.alignItems = "flex-start";
   if (mod===1) {
     show("page-m1"); hide("page-m2");
     m1Mode="flash"; syncTabs(); initSession();
   } else {
     hide("page-m1"); show("page-m2");
-    // Dil seçim ekranını göster, uygulamayı gizle
     show("m2-lang-screen"); hide("m2-app");
   }
+  setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
 function showMenu() {
@@ -183,6 +185,9 @@ function showMenu() {
   if (a) { a.pause(); a.src=""; }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   show("page-menu"); hide("page-m1"); hide("page-m2");
+  // Menüde tekrar ortala
+  document.body.style.alignItems = "";
+  setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
 // ════════════════════════════════════════
@@ -502,22 +507,31 @@ function m2SelectLang(lang, flag, name) {
   m2Lang     = lang;
   m2LangFlag = flag;
   m2LangName = name;
-  // Topbar'ı güncelle
   setText("m2-cur-flag", flag);
   setText("m2-cur-name", name);
-  // Ekran geçişi
   hide("m2-lang-screen");
   show("m2-app");
-  // Oturumu başlat
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
+  // body flex-start yap ki içerik yukarıdan başlasın
+  document.body.style.alignItems = "flex-start";
+  // Kısa gecikme ile scroll — DOM render'dan sonra
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const app = document.getElementById("m2-app");
+    if (app) app.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 50);
 }
 
 function m2ChangeLang() {
-  // Uygulamayı gizle, dil seçim ekranını göster
   hide("m2-app");
   show("m2-lang-screen");
+  // Dil seçim ekranında tekrar ortala
+  document.body.style.alignItems = "";
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 50);
 }
 
 // ── Oturum Başlat ──
