@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sicher! B2 Vokabeltrainer</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="container">
+
+  <!-- ══ HAUPTMENÜ ══ -->
+  <div id="page-menu">
+    <header class="hero">
+      <h1>Sicher! B2 Vokabeltrainer</h1>
+      <p class="subtitle">Wähle deinen Lernmodus</p>
+    </header>
+    <div class="modules">
+
+      <div class="module-card" onclick="openTrainer(1)" role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){openTrainer(1)}">
+        <span class="badge">Mit Audio</span>
+        <div class="module-icon">🔊</div>
+        <h2 class="module-title">Modul 1</h2>
+        <p class="module-subtitle">Sicher! B2 – Hörtraining</p>
+        <div class="module-stats"><div class="stat" id="m1-words-display">Lade Daten...</div></div>
+        <div class="module-features">
+          <div class="feature"><span>📝</span><span>Beispielsätze &amp; Audio</span></div>
+          <div class="feature"><span>🎧</span><span>Aussprache-Training</span></div>
+          <div class="feature"><span>🗂</span><span id="m1-kapitel-info">Kapitel werden geladen...</span></div>
+        </div>
+        <button class="module-btn" id="m1-btn" disabled>Lade...</button>
+      </div>
+
+      <div class="module-card" onclick="openTrainer(2)" role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){openTrainer(2)}">
+        <span class="badge badge-blue">6 Sprachen</span>
+        <div class="module-icon">🌍</div>
+        <h2 class="module-title">Modul 2</h2>
+        <p class="module-subtitle">Sicher! B2 – Multilingual</p>
+        <div class="module-stats"><div class="stat" id="m2-words-display">Lade Daten...</div></div>
+        <div class="module-features">
+          <div class="feature"><span>🌐</span><span>TR, EN, UK, AR, FA, KU</span></div>
+          <div class="feature"><span>🎯</span><span>Quiz &amp; Flashcards</span></div>
+          <div class="feature"><span>📊</span><span>Echtzeit Statistik</span></div>
+        </div>
+        <button class="module-btn" id="m2-btn" disabled>Lade...</button>
+      </div>
+
+    </div>
+    <p class="footnote" id="load-hint"></p>
+  </div>
+
+  <!-- ══ MODUL 1 ══ -->
+  <div id="page-m1" class="hidden">
+
+    <div class="m1-topbar">
+      <button class="m1-back" onclick="showMenu()">← Menü</button>
+      <span class="m1-title-txt">🇩🇪 Deutsch Vokabeltrainer</span>
+    </div>
+
+    <div class="m1-stats-row">
+      <div class="m1-sbox"><div class="msb-icon">📚</div><div class="msb-label">Gesamt</div><div class="msb-val" id="s-total">0</div></div>
+      <div class="m1-sbox"><div class="msb-icon">✅</div><div class="msb-label">Gelernt</div><div class="msb-val" id="s-learned">0</div></div>
+      <div class="m1-sbox"><div class="msb-icon">🎯</div><div class="msb-label">Übrig</div><div class="msb-val" id="s-remaining">0</div></div>
+      <div class="m1-sbox"><div class="msb-icon">⭐</div><div class="msb-label">Favoriten</div><div class="msb-val" id="s-fav">0</div></div>
+    </div>
+
+    <div class="m1-goal">
+      <div class="m1-goal-txt">🎯 Tägliches Ziel: <strong>10 Wörter</strong> &nbsp; Heute gelernt: <strong><span id="s-today">0</span> / 10</strong></div>
+      <div class="m1-goal-track"><div class="m1-goal-fill" id="s-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="m1-panel">
+      <div class="m1-tabs">
+        <button class="m1-tab active" id="tab-flash"  onclick="setMode('flash')">🃏 Lernkarten</button>
+        <button class="m1-tab"        id="tab-quiz"   onclick="setMode('quiz')">🎯 Multiple Choice</button>
+        <button class="m1-tab"        id="tab-write"  onclick="setMode('write')">✏️ Schreib-Quiz</button>
+        <button class="m1-tab"        id="tab-review" onclick="setMode('review')">🔄 Wiederholung</button>
+      </div>
+      <div class="m1-filters">
+        <label class="m1-fi"><span>Lektion</span>
+          <select id="f-unit" onchange="buildTeilMenu();initSession()"><option value="all">Alle</option></select>
+        </label>
+        <label class="m1-fi"><span>Teil</span>
+          <select id="f-part" onchange="initSession()"><option value="all">Alle</option></select>
+        </label>
+        <label class="m1-fi"><span>Suchen</span>
+          <input id="f-search" type="text" placeholder="Wort suchen..." oninput="initSession()">
+        </label>
+        <label class="m1-fi"><span>Filter</span>
+          <select id="f-status" onchange="initSession()">
+            <option value="all">Alle Wörter</option>
+            <option value="unlearned">Nicht gelernt</option>
+            <option value="learned">Gelernt</option>
+            <option value="fav">Favoriten</option>
+          </select>
+        </label>
+      </div>
+      <div class="m1-actions">
+        <button class="m1-act" onclick="doShuffle()">🔀 Mischen</button>
+        <button class="m1-act" onclick="doStats()">📊 Statistiken</button>
+        <button class="m1-act" onclick="showMenu()">🏠 Home</button>
+        <button class="m1-act danger" onclick="doReset()">🔄 Zurücksetzen</button>
+      </div>
+      <div class="m1-voice-row">
+        <label class="m1-fi" style="flex:1">
+          <span>🔊 Stimme</span>
+          <select id="voice-select" onchange="setVoice(this.value)">
+            <option>Wird geladen...</option>
+          </select>
+        </label>
+        <button class="m1-act" onclick="ttsSpeak(['Guten Tag, ich lerne Deutsch!'])">▶ Testen</button>
+      </div>
+    </div>
+
+    <!-- Lernkarten -->
+    <div id="area-flash">
+      <div class="m1-card-wrap" onclick="doFlip()">
+        <button class="fav-btn" id="fav-btn" onclick="event.stopPropagation();doFav()">☆</button>
+        <div class="m1-card-inner" id="m1-card-inner">
+          <div class="m1-cf">
+            <div class="m1-word"    id="fc-word">Wort</div>
+            <div class="m1-grammar" id="fc-grammar"></div>
+            <div class="m1-badges"  id="fc-badges"></div>
+            <button class="m1-listen" onclick="event.stopPropagation();doAudio()">🔊 Anhören</button>
+            <div class="m1-hint">🖐 Klicken zum Umdrehen</div>
+          </div>
+          <div class="m1-cb">
+            <div class="m1-sentence" id="fc-sentence">Beispielsatz</div>
+            <button class="m1-listen" onclick="event.stopPropagation();doAudio()">🔊 Nochmal hören</button>
+          </div>
+        </div>
+      </div>
+      <audio id="m1-audio"></audio>
+      <div class="m1-nav">
+        <button class="m1-nbtn back"    onclick="doPrev()">← Zurück</button>
+        <button class="m1-nbtn learned" onclick="doLearned()">✅ Gelernt</button>
+        <button class="m1-nbtn next"    onclick="doNext()">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- Multiple Choice -->
+    <div id="area-quiz" class="hidden">
+      <div class="m1-qbox">
+        <div class="m1-qtop"><span class="chip">Frage</span><span class="chip chip-muted" id="q-meta"></span></div>
+        <div class="m1-qq" id="q-question"></div>
+      </div>
+      <div class="m1-opts" id="q-opts"></div>
+      <div class="m1-nav">
+        <button class="m1-nbtn back" onclick="doPrev()">← Zurück</button>
+        <button class="m1-nbtn next" onclick="doNext()">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- Schreib-Quiz -->
+    <div id="area-write" class="hidden">
+      <div class="m1-qbox">
+        <div class="m1-qtop"><span class="chip">Schreib-Quiz</span><span class="chip chip-muted" id="w-meta"></span></div>
+        <div class="m1-qq" id="w-question"></div>
+      </div>
+      <div class="m1-write-row">
+        <input type="text" id="w-input" class="m1-winput" placeholder="Antwort eingeben..." onkeydown="if(event.key==='Enter')doCheck()">
+        <button class="m1-nbtn learned" onclick="doCheck()">✅ Prüfen</button>
+      </div>
+      <div id="w-result" class="m1-wresult hidden"></div>
+      <div class="m1-nav" style="margin-top:12px">
+        <button class="m1-nbtn back" onclick="doPrev()">← Zurück</button>
+        <button class="m1-nbtn next" onclick="doNext()">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- Wiederholung -->
+    <div id="area-review" class="hidden">
+      <div id="review-content"></div>
+    </div>
+
+  </div><!-- /page-m1 -->
+
+  <!-- ══ MODUL 2 ══ -->
+  <div id="page-m2" class="hidden">
+
+    <!-- ADIM 1: Dil Seçim Ekranı -->
+    <div id="m2-lang-screen">
+      <div class="m2-lang-header">
+        <h2>🌍 Sicher! B2 – Multilingual</h2>
+        <p>Wähle deine Muttersprache</p>
+      </div>
+      <div class="m2-lang-grid">
+        <div class="m2-lang-card" onclick="m2SelectLang('Turkisch','🇹🇷','Türkçe')">
+          <div class="m2-lang-flag">🇹🇷</div>
+          <div class="m2-lang-name">Türkçe</div>
+          <div class="m2-lang-native">Türkisch</div>
+        </div>
+        <div class="m2-lang-card" onclick="m2SelectLang('Englisch','🇬🇧','English')">
+          <div class="m2-lang-flag">🇬🇧</div>
+          <div class="m2-lang-name">English</div>
+          <div class="m2-lang-native">Englisch</div>
+        </div>
+        <div class="m2-lang-card" onclick="m2SelectLang('Ukrainisch (Українська)','🇺🇦','Українська')">
+          <div class="m2-lang-flag">🇺🇦</div>
+          <div class="m2-lang-name">Українська</div>
+          <div class="m2-lang-native">Ukrainisch</div>
+        </div>
+        <div class="m2-lang-card" onclick="m2SelectLang('Arabisch (العربية)','🇸🇦','العربية')">
+          <div class="m2-lang-flag">🇸🇦</div>
+          <div class="m2-lang-name">العربية</div>
+          <div class="m2-lang-native">Arabisch</div>
+        </div>
+        <div class="m2-lang-card" onclick="m2SelectLang('Farsi (فارسی)','🇮🇷','فارسی')">
+          <div class="m2-lang-flag">🇮🇷</div>
+          <div class="m2-lang-name">فارسی</div>
+          <div class="m2-lang-native">Farsi</div>
+        </div>
+        <div class="m2-lang-card" onclick="m2SelectLang('Kurdisch (Kurmancî)','🕊️','Kurdî')">
+          <div class="m2-lang-flag">🕊️</div>
+          <div class="m2-lang-name">Kurdî</div>
+          <div class="m2-lang-native">Kurdisch</div>
+        </div>
+      </div>
+      <div class="m2-lang-back">
+        <button class="m1-back" onclick="showMenu()">← Zurück zum Menü</button>
+      </div>
+    </div>
+
+    <!-- ADIM 2: Ana Uygulama -->
+    <div id="m2-app" class="hidden">
+
+      <!-- Top bar -->
+      <div class="m2-topbar">
+        <div class="m2-topbar-lang">
+          <span id="m2-cur-flag">🇹🇷</span>
+          <span>Deutsch ↔</span>
+          <span id="m2-cur-name">Türkçe</span>
+        </div>
+        <div class="m2-topbar-btns">
+          <button class="m2-changebtn" onclick="m2ChangeLang()">🌍 Sprache</button>
+          <button class="m1-back" onclick="showMenu()">← Menü</button>
+        </div>
+      </div>
+
+      <!-- Stats glassmorphism -->
+      <div class="m2-stats-row">
+        <div class="m2-stat-item">📚 Gesamt<strong id="m2-total">0</strong></div>
+        <div class="m2-stat-item">✅ Gelernt<strong id="m2-correct">0</strong></div>
+        <div class="m2-stat-item">❌ Falsch<strong id="m2-wrong">0</strong></div>
+        <div class="m2-stat-item">📊 Score<strong id="m2-pct">0%</strong></div>
+      </div>
+
+      <!-- Animasyonlu progress bar -->
+      <div class="m2-progress-bar">
+        <div class="m2-progress-fill" id="m2-prog-fill" style="width:0%"></div>
+      </div>
+
+      <!-- Kontroller -->
+      <div class="m2-controls">
+        <div class="m2-tabs">
+          <button class="m2-tab active" id="m2-tab-flash" onclick="m2SetMode('flash')">📇 Lernkarten</button>
+          <button class="m2-tab"        id="m2-tab-quiz"  onclick="m2SetMode('quiz')">🎯 Quiz</button>
+        </div>
+        <div class="m2-filter-row">
+          <label class="m1-fi">
+            <span>Lektion</span>
+            <select id="m2-unit" onchange="m2Init()"><option value="all">Alle Lektionen</option></select>
+          </label>
+          <button class="m1-act" onclick="m2Shuffle()">🔀 Mischen</button>
+        </div>
+      </div>
+
+      <!-- Lernkarten Modus -->
+      <div id="m2-flash-area">
+        <div class="m2-card" onclick="m2Flip()">
+          <button class="fav-btn" id="m2-fav-btn" onclick="event.stopPropagation();m2ToggleFav()">☆</button>
+
+          <!-- Ön yüz -->
+          <div class="m2-card-front" id="m2-card-front">
+            <div class="m2-card-word" id="m2-de">Wort</div>
+            <div class="m2-card-meta">
+              <span class="m1-badge" id="m2-lektion-badge">Lektion -</span>
+            </div>
+            <div class="m1-hint" style="margin-top:14px">👆 Klicken zum Umdrehen</div>
+          </div>
+
+          <!-- Arka yüz -->
+          <div class="m2-card-back hidden" id="m2-card-back">
+            <div class="m2-card-word" id="m2-tr">Übersetzung</div>
+            <div class="m2-card-translation" id="m2-sent">Beispielsatz...</div>
+            <div class="m2-card-meta">
+              <span class="m1-badge" id="m2-lektion-badge-back">Lektion -</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="m1-nav" style="margin-top:14px">
+          <button class="m1-nbtn back"    onclick="m2Prev()">← Zurück</button>
+          <button class="m1-nbtn learned" onclick="m2MarkLearned()">✅ Gelernt</button>
+          <button class="m1-nbtn next"    onclick="m2Next()">Weiter →</button>
+        </div>
+      </div>
+
+      <!-- Quiz Modus -->
+      <div id="m2-quiz-area" class="hidden">
+        <div class="m2-progress-bar" style="margin-bottom:12px">
+          <div class="m2-progress-fill" id="m2-quiz-prog" style="width:0%"></div>
+        </div>
+        <div class="m2-card" style="cursor:default; min-height:160px; padding:28px">
+          <div class="m2-card-word" id="m2-qq" style="font-size:1.6rem">Quiz wird geladen...</div>
+          <div class="m2-card-meta" style="margin-top:10px">
+            <span class="chip chip-muted" id="m2-qmeta"></span>
+          </div>
+        </div>
+        <div class="m2-quiz-opts" id="m2-qopts"></div>
+        <div class="m1-nav" style="margin-top:14px">
+          <button class="m1-nbtn back" onclick="m2Prev()">← Zurück</button>
+          <button class="m1-nbtn next" onclick="m2Next()">Weiter →</button>
+        </div>
+      </div>
+
+    </div><!-- /m2-app -->
+
+  </div><!-- /page-m2 -->
+
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="script.js"></script>
+<noscript>Bitte JavaScript aktivieren.</noscript>
+</body>
+</html>
