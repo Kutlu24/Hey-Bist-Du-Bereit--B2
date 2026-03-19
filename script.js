@@ -77,22 +77,27 @@ async function loadModul1() {
     // Excel tarihleri UTC 00:00:00 olarak kaydedilmiş.
     // "Bugün yayınlandı" = ts < yarının 00:00 UTC
     const _today = new Date();
-    // Yarının 00:00:00 UTC — JSON'daki tarihler günün sonuna (23:59:59.999) ayarlandı
-    // bu yüzden basit < karşılaştırması yeterli
-    const TOMORROW_UTC = Date.UTC(
-      _today.getUTCFullYear(), _today.getUTCMonth(), _today.getUTCDate() + 1
-    );
+    // Bugünün tarihi UTC olarak al (yıl, ay, gün)
+    const _y = _today.getUTCFullYear();
+    const _m = _today.getUTCMonth();
+    const _d = _today.getUTCDate();
+    // Bugünün başlangıcı (00:00:00 UTC)
+    const TODAY_UTC_START = Date.UTC(_y, _m, _d);
+    // Yarının başlangıcı (00:00:00 UTC) = bugünün sonu + 1ms
+    const TOMORROW_UTC_START = Date.UTC(_y, _m, _d + 1);
 
     const K_AUDIO_TS = "audio_datum";
     const K_KARTE_TS = "karte_datum";
 
-    // Her kayıta ses ve kart hazır bayraklarını ekle
-    // <= TOMORROW_UTC: tam gece yarısı (00:00:00) kaydedilen tarihleri de yakalar
+    // JSON'daki tarihler 00:00:00 UTC olarak kaydedilmiş
+    // "Bugün yayınlandı" = ts === TODAY_UTC_START (tam bugün)
+    // "Daha önce yayınlandı" = ts < TODAY_UTC_START
+    // Yani: ts <= TODAY_UTC_START → bugün veya geçmişte
     m1All.forEach(r => {
       const ats = r[K_AUDIO_TS];
       const kts = r[K_KARTE_TS];
-      r._audioReady = (typeof ats === "number") && (ats < TOMORROW_UTC);
-      r._karteReady = (typeof kts === "number") && (kts < TOMORROW_UTC);
+      r._audioReady = (typeof ats === "number") && (ats <= TODAY_UTC_START);
+      r._karteReady = (typeof kts === "number") && (kts <= TODAY_UTC_START);
     });
 
     // Kart görünürlüğü: Karte tarihi geldi mi?
