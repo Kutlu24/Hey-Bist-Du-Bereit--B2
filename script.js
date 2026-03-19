@@ -101,19 +101,10 @@ async function loadModul1() {
     // Kart görünürlüğü: Karte tarihi geldi mi?
     m1Vocab = m1All.filter(r => r._karteReady === true);
 
-    // DEBUG - tarayıcı console'unda görünür
-    console.log("=== MODUL 1 TARIH DEBUG ===");
-    console.log("Bugün UTC:", new Date().toISOString());
-    console.log("TOMORROW_UTC:", new Date(TOMORROW_UTC).toISOString());
-    const k3sample = m1All.find(r => r.Kapitel === 3);
-    if (k3sample) {
-      console.log("K3 audio_datum:", k3sample.audio_datum, "→", new Date(k3sample.audio_datum).toISOString());
-      console.log("K3 karte_datum:", k3sample.karte_datum, "→", new Date(k3sample.karte_datum).toISOString());
-      console.log("K3 _audioReady:", k3sample._audioReady);
-      console.log("K3 _karteReady:", k3sample._karteReady);
-    }
-    console.log("Toplam m1Vocab:", m1Vocab.length);
-    console.log("===========================");
+    console.log("m1Vocab:", m1Vocab.length, "/ m1All:", m1All.length);
+    console.log("TODAY_UTC_START:", TODAY_UTC_START, new Date(TODAY_UTC_START).toISOString());
+    const _k3 = m1All.find(r => r["Kapitel"] === 3);
+    if (_k3) console.log("K3:", _k3.audio_datum, _k3.karte_datum, "_karteReady:", _k3._karteReady);
 
     const allK  = [...new Set(m1All.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
     const openK = [...new Set(m1Vocab.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
@@ -125,8 +116,8 @@ async function loadModul1() {
 
     buildM1Menu();
   } catch(e) {
-    console.error("Modul1:", e);
-    setText("m1-words-display", "Ladefehler!");
+    console.error("Modul1 HATA:", e, e.stack);
+    setText("m1-words-display", "Fehler: " + e.message);
     setText("load-hint", "modul1.json konnte nicht geladen werden. Bitte über einen Webserver öffnen (z.B. VS Code Live Server).");
   }
 }
