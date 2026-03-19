@@ -106,7 +106,9 @@ async function loadModul2() {
   try {
     const res = await fetch("sicher.csv", { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
-    const txt = await res.text();
+    let txt = await res.text();
+    // BOM kaldır — Chrome/Edge BOM'u kolon adına ekler, Firefox eklemez
+    if (txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
     const p   = Papa.parse(txt, { header:true, skipEmptyLines:true, dynamicTyping:false });
     m2Vocab   = (p.data||[]).map(normM2).filter(r=>r&&r[M2C.de]&&r[M2C.sentence]);
 
@@ -123,7 +125,8 @@ async function loadModul2() {
 function normM2(row) {
   const c = {};
   for (const k in row) {
-    const key = (k||"").trim();
+    // BOM ve boşlukları kolon adından temizle
+    const key = (k||"").replace(/^\uFEFF/, "").trim();
     c[key] = typeof row[k]==="string" ? row[k].replace(/\u00A0/g," ").trim() : row[k];
   }
   const n = parseInt(String(c[M2C.lesson]||"").trim(),10);
@@ -167,15 +170,25 @@ function buildM2Menu() {
 function openTrainer(mod) {
   const vocab = mod===1 ? m1Vocab : m2Vocab;
   if (!vocab.length) { alert("Daten noch nicht geladen. Bitte kurz warten."); return; }
-  hide("page-menu");
-  // Trainer sayfalarında içerik uzun → flex-start
-  document.body.style.alignItems = "flex-start";
+
+  // Menüyü gizle
+  const menuEl = document.getElementById("page-menu");
+  const m1El   = document.getElementById("page-m1");
+  const m2El   = document.getElementById("page-m2");
+  if (menuEl) menuEl.style.display = "none";
+
   if (mod===1) {
-    show("page-m1"); hide("page-m2");
+    if (m1El) m1El.style.display = "block";
+    if (m2El) m2El.style.display = "none";
     m1Mode="flash"; syncTabs(); initSession();
   } else {
-    hide("page-m1"); show("page-m2");
-    show("m2-lang-screen"); hide("m2-app");
+    if (m1El) m1El.style.display = "none";
+    if (m2El) m2El.style.display = "block";
+    // Dil seçim ekranı açık, uygulama gizli
+    const langScreen = document.getElementById("m2-lang-screen");
+    const appEl      = document.getElementById("m2-app");
+    if (langScreen) langScreen.style.display = "block";
+    if (appEl)      appEl.style.display      = "none";
   }
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
@@ -184,9 +197,14 @@ function showMenu() {
   const a = document.getElementById("m1-audio");
   if (a) { a.pause(); a.src=""; }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
-  show("page-menu"); hide("page-m1"); hide("page-m2");
-  // Menüde tekrar ortala
-  document.body.style.alignItems = "";
+
+  const menuEl = document.getElementById("page-menu");
+  const m1El   = document.getElementById("page-m1");
+  const m2El   = document.getElementById("page-m2");
+  if (menuEl) menuEl.style.display = "block";
+  if (m1El)   m1El.style.display   = "none";
+  if (m2El)   m2El.style.display   = "none";
+
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
@@ -509,29 +527,28 @@ function m2SelectLang(lang, flag, name) {
   m2LangName = name;
   setText("m2-cur-flag", flag);
   setText("m2-cur-name", name);
-  hide("m2-lang-screen");
-  show("m2-app");
+
+  // C1 sitesindeki gibi: display ile göster/gizle
+  const langScreen = document.getElementById("m2-lang-screen");
+  const appEl      = document.getElementById("m2-app");
+  if (langScreen) langScreen.style.display = "none";
+  if (appEl)      appEl.style.display      = "block";
+
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
-  // body flex-start yap ki içerik yukarıdan başlasın
-  document.body.style.alignItems = "flex-start";
-  // Kısa gecikme ile scroll — DOM render'dan sonra
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    const app = document.getElementById("m2-app");
-    if (app) app.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 50);
+
+  // Sayfanın en üstüne scroll
+  setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
 function m2ChangeLang() {
-  hide("m2-app");
-  show("m2-lang-screen");
-  // Dil seçim ekranında tekrar ortala
-  document.body.style.alignItems = "";
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, 50);
+  const langScreen = document.getElementById("m2-lang-screen");
+  const appEl      = document.getElementById("m2-app");
+  if (appEl)      appEl.style.display      = "none";
+  if (langScreen) langScreen.style.display = "block";
+
+  setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
 // ── Oturum Başlat ──
