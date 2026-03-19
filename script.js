@@ -177,7 +177,7 @@ function openTrainer(mod) {
     // Modul 2: veri olmasa bile dil seçim ekranını göster
     hide("page-menu");
     hide("page-m1"); show("page-m2");
-    show("m2-lang-screen"); hide("m2-app");
+    m2ShowLang();
   }
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
@@ -513,8 +513,7 @@ function m2SelectLang(lang, flag, name) {
   m2LangName = name;
   setText("m2-cur-flag", flag);
   setText("m2-cur-name", name);
-  hide("m2-lang-screen");
-  show("m2-app");
+  m2ShowApp();
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
@@ -530,12 +529,26 @@ function m2SelectLang(lang, flag, name) {
 }
 
 function m2ChangeLang() {
-  hide("m2-app");
-  show("m2-lang-screen");
+  m2ShowLang();
   setTimeout(() => {
     const langEl = document.getElementById("m2-lang-screen");
     if (langEl) langEl.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 100);
+}
+
+// style.display ile kesin göster/gizle — CSS specificity sorununu önler
+function m2ShowApp() {
+  const langEl = document.getElementById("m2-lang-screen");
+  const appEl  = document.getElementById("m2-app");
+  if (langEl) langEl.style.display = "none";
+  if (appEl)  appEl.style.display  = "block";
+}
+
+function m2ShowLang() {
+  const langEl = document.getElementById("m2-lang-screen");
+  const appEl  = document.getElementById("m2-app");
+  if (appEl)  appEl.style.display  = "none";
+  if (langEl) langEl.style.display = "flex";
 }
 
 // ── Oturum Başlat ──
