@@ -98,6 +98,20 @@ async function loadModul1() {
     // Kart görünürlüğü: Karte tarihi geldi mi?
     m1Vocab = m1All.filter(r => r._karteReady === true);
 
+    // DEBUG - tarayıcı console'unda görünür
+    console.log("=== MODUL 1 TARIH DEBUG ===");
+    console.log("Bugün UTC:", new Date().toISOString());
+    console.log("TOMORROW_UTC:", new Date(TOMORROW_UTC).toISOString());
+    const k3sample = m1All.find(r => r.Kapitel === 3);
+    if (k3sample) {
+      console.log("K3 audio_datum:", k3sample.audio_datum, "→", new Date(k3sample.audio_datum).toISOString());
+      console.log("K3 karte_datum:", k3sample.karte_datum, "→", new Date(k3sample.karte_datum).toISOString());
+      console.log("K3 _audioReady:", k3sample._audioReady);
+      console.log("K3 _karteReady:", k3sample._karteReady);
+    }
+    console.log("Toplam m1Vocab:", m1Vocab.length);
+    console.log("===========================");
+
     const allK  = [...new Set(m1All.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
     const openK = [...new Set(m1Vocab.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
 
@@ -116,6 +130,7 @@ async function loadModul1() {
 
 async function loadModul2() {
   try {
+    console.log("=== MODUL 2 YUKLENIYOR ===");
     const res = await fetch("sicher.csv", { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     let txt = await res.text();
@@ -124,13 +139,14 @@ async function loadModul2() {
     const p   = Papa.parse(txt, { header:true, skipEmptyLines:true, dynamicTyping:false });
     m2Vocab   = (p.data||[]).map(normM2).filter(r=>r&&r[M2C.de]&&r[M2C.sentence]);
 
+    console.log("m2Vocab yüklendi:", m2Vocab.length, "kelime");
     setText("m2-words-display", m2Vocab.length + " Wörter bereit");
     const btn = document.getElementById("m2-btn");
     if (btn) { btn.innerText = "Starten →"; btn.disabled = false; }
     buildM2Menu();
   } catch(e) {
-    console.error("Modul2:", e);
-    setText("m2-words-display", "CSV Fehler!");
+    console.error("Modul2 HATA:", e);
+    setText("m2-words-display", "CSV Fehler: " + e.message);
   }
 }
 
@@ -572,10 +588,6 @@ function m2SelectLang(lang, flag, name) {
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
-  // Twemoji parse (Chrome/Edge için bayraklar)
-  if (window.twemoji) {
-    setTimeout(() => twemoji.parse(document.getElementById("m2-app"), { folder: "svg", ext: ".svg" }), 50);
-  }
   // m2-app görününce ona scroll et
   setTimeout(() => {
     const appEl = document.getElementById("m2-app");
