@@ -509,43 +509,29 @@ function m2SelectLang(lang, flag, name) {
   m2LangName = name;
   setText("m2-cur-flag", flag);
   setText("m2-cur-name", name);
-
-  // display ile yönet — hidden class + explicit display birlikte
-  const langEl = document.getElementById("m2-lang-screen");
-  const appEl  = document.getElementById("m2-app");
-  if (langEl) langEl.style.display = "none";
-  if (appEl)  appEl.style.display  = "block";
-
+  hide("m2-lang-screen");
+  show("m2-app");
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
-
-  // Twemoji parse
+  // Twemoji parse (Chrome/Edge için bayraklar)
   if (window.twemoji) {
-    const topbar = document.querySelector(".m2-topbar");
-    if (topbar) twemoji.parse(topbar, { folder: "svg", ext: ".svg" });
+    setTimeout(() => twemoji.parse(document.getElementById("m2-app"), { folder: "svg", ext: ".svg" }), 50);
   }
-
-  // m2-app'in başına scroll
+  // m2-app görününce ona scroll et
   setTimeout(() => {
-    if (appEl) {
-      appEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, 80);
+    const appEl = document.getElementById("m2-app");
+    if (appEl) appEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
 }
 
 function m2ChangeLang() {
-  const langEl = document.getElementById("m2-lang-screen");
-  const appEl  = document.getElementById("m2-app");
-  if (appEl)  appEl.style.display  = "none";
-  if (langEl) langEl.style.display = "";  // flex'e dönsün
-
+  hide("m2-app");
+  show("m2-lang-screen");
   setTimeout(() => {
+    const langEl = document.getElementById("m2-lang-screen");
     if (langEl) langEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    else window.scrollTo({ top: 0, behavior: "smooth" });
-  }, 80);
+  }, 100);
 }
 
 // ── Oturum Başlat ──
