@@ -263,7 +263,11 @@ function renderFlash(item) {
   const fb = document.getElementById("fav-btn");
   if (fb) fb.textContent = favSet.has(item[K_WORT]) ? "★" : "☆";
   const audio = document.getElementById("m1-audio");
-  if (audio) audio.src = item[K_AUDIO] || item[K_AUDIO2] || "";
+  if (audio) {
+    const rf = item[K_AUDIO] || item[K_AUDIO2] || "";
+    audio.src = rf && !rf.startsWith("sesler/") && !rf.startsWith("http")
+      ? "sesler/" + rf : rf;
+  }
   document.getElementById("m1-card-inner")?.classList.remove("flipped");
 }
 
@@ -297,7 +301,11 @@ function doAudio() {
   if (!item) return;
 
   const isFlipped = document.getElementById("m1-card-inner")?.classList.contains("flipped");
-  const file = item[K_AUDIO] || item[K_AUDIO2] || "";
+  const rawFile = item[K_AUDIO] || item[K_AUDIO2] || "";
+  // sesler/ klasöründen yükle (zaten tam yol varsa olduğu gibi bırak)
+  const file = rawFile
+    ? (rawFile.startsWith("sesler/") || rawFile.startsWith("http") ? rawFile : "sesler/" + rawFile)
+    : "";
 
   if (isFlipped) {
     ttsSpeak([item[K_SENT] || ""]);
