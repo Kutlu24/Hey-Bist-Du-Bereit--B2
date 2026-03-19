@@ -168,15 +168,15 @@ function buildM2Menu() {
 //  NAVİGASYON
 // ════════════════════════════════════════
 function openTrainer(mod) {
-  const vocab = mod===1 ? m1Vocab : m2Vocab;
-  if (!vocab.length) { alert("Daten noch nicht geladen. Bitte kurz warten."); return; }
-  hide("page-menu");
   if (mod===1) {
+    if (!m1Vocab.length) { alert("Modul 1 wird noch geladen. Bitte kurz warten."); return; }
+    hide("page-menu");
     show("page-m1"); hide("page-m2");
     m1Mode="flash"; syncTabs(); initSession();
   } else {
+    // Modul 2: veri olmasa bile dil seçim ekranını göster
+    hide("page-menu");
     hide("page-m1"); show("page-m2");
-    // Dil seçim ekranı göster, uygulama gizle
     show("m2-lang-screen"); hide("m2-app");
   }
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
@@ -504,6 +504,10 @@ function syncTabs() {
 
 // ── Dil Seçim ──
 function m2SelectLang(lang, flag, name) {
+  if (!m2Vocab.length) {
+    alert("Daten werden geladen. Bitte noch einen Moment warten.");
+    return;
+  }
   m2Lang     = lang;
   m2LangFlag = flag;
   m2LangName = name;
