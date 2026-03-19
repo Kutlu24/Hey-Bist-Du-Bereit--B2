@@ -27,11 +27,14 @@ body{
 .container {
   width: 100%;
   max-width: 1040px;
-  /* Menüyü dikey ortala */
+}
+
+/* Sadece menü ekranını dikey ortala */
+#page-menu {
+  min-height: calc(100vh - 40px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: calc(100vh - 40px);
 }
 
 @keyframes gradientShift{
@@ -540,7 +543,9 @@ select{
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 24px 60px rgba(0,0,0,.3);
 }
-.m2-lang-flag  { font-size: 3.4rem; margin-bottom: 12px; }
+.m2-lang-flag  { font-size: 3.4rem; margin-bottom: 12px; line-height: 1; }
+/* Twemoji img boyutu */
+.m2-lang-flag img { width: 3.4rem; height: 3.4rem; }
 .m2-lang-name  { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
 .m2-lang-native{ font-size: .95rem; color: var(--muted); }
 
