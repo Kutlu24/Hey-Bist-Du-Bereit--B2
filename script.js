@@ -301,33 +301,53 @@ function doAudio() {
   if (!item) return;
 
   const isFlipped = document.getElementById("m1-card-inner")?.classList.contains("flipped");
+
+  // Arka yüz: sadece cümleyi oku
+  if (isFlipped) {
+    ttsSpeak([item[K_SENT] || ""]);
+    return;
+  }
+
   const rawFile = item[K_AUDIO] || item[K_AUDIO2] || "";
-  // sesler/ klasöründen yükle (zaten tam yol varsa olduğu gibi bırak)
   const file = rawFile
     ? (rawFile.startsWith("sesler/") || rawFile.startsWith("http") ? rawFile : "sesler/" + rawFile)
     : "";
 
-  if (isFlipped) {
-    ttsSpeak([item[K_SENT] || ""]);
-  } else {
-    if (file) {
+  if (!file) {
+    ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+    return;
+  }
+
+  // Önce fetch ile dosyanın gerçekten var olup olmadığını kontrol et
+  fetch(file, { method: "HEAD" })
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      // Dosya var → Audio ile çal
       const opusEl = document.getElementById("m1-audio");
       opusEl.src = file;
+      opusEl.type = "audio/ogg; codecs=opus";
       opusEl.currentTime = 0;
       opusEl.onended = null;
-      opusEl.play()
-        .then(() => {
-          opusEl.onended = () => {
-            ttsSpeak([item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-          };
-        })
-        .catch(() => {
-          ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-        });
-    } else {
+      opusEl.onerror = null;
+
+      const afterAudio = () => {
+        ttsSpeak([item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+      };
+
+      opusEl.onended = afterAudio;
+      opusEl.onerror = () => {
+        // Dosya var ama çalamazsa TTS'ye geç
+        ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+      };
+
+      opusEl.play().catch(() => {
+        ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+      });
+    })
+    .catch(() => {
+      // Dosya yok (404 vb.) → TTS ile oku
       ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-    }
-  }
+    });
 }
 
 // Metinleri sırayla seslendir — onend zinciri ile güvenli kuyruk
