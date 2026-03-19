@@ -14,7 +14,7 @@ const K_KAPI  = "Kapitel";
 const K_TEIL  = "Teil";
 const K_AUDIO = "ses_dosyasi";
 const K_AUDIO2= "Audio Datei";
-const K_KARTE = "Veröffentlichungsdatum \n(Karte)";
+const K_KARTE = "karte_datum";
 
 // ════════════════════════════════════════
 //  MODUL 1 DURUM
@@ -81,8 +81,8 @@ async function loadModul1() {
       _today.getUTCFullYear(), _today.getUTCMonth(), _today.getUTCDate() + 1
     );
 
-    const K_AUDIO_TS = "Veröffentlichungsdatum \n(Audio) ";
-    const K_KARTE_TS = "Veröffentlichungsdatum \n(Karte)";
+    const K_AUDIO_TS = "audio_datum";
+    const K_KARTE_TS = "karte_datum";
 
     // Her kayıta ses ve kart hazır bayraklarını ekle
     m1All.forEach(r => {
