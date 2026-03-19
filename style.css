@@ -504,6 +504,9 @@ select{
   align-items: center;
   padding: 30px 16px 40px;
 }
+#m2-lang-screen.hidden { display: none !important; }
+
+#m2-app.hidden { display: none !important; }
 
 .m2-lang-header {
   text-align: center;
