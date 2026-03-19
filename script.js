@@ -74,25 +74,26 @@ async function loadModul1() {
     loadLS();
 
     // Tarih filtresi:
-    // Excel'de tarihler UTC gece yarısı (00:00:00) olarak kaydedilmiş.
-    // Bugünün başlangıcından bir sonraki günün başlangıcına kadar = "bugün" sayılır.
-    // Böylece 19.03 00:00 UTC kaydı, 19.03 günü boyunca görünür olur.
-    const today = new Date();
-    const TOMORROW_START = Date.UTC(
-      today.getFullYear(), today.getMonth(), today.getDate() + 1
-    ); // Yarının 00:00 UTC = bugünün sonu
+    // Excel tarihleri UTC 00:00:00 olarak kaydedilmiş.
+    // "Bugün yayınlandı" = ts < yarının 00:00 UTC
+    const _today = new Date();
+    const TOMORROW_UTC = Date.UTC(
+      _today.getUTCFullYear(), _today.getUTCMonth(), _today.getUTCDate() + 1
+    );
+
     const K_AUDIO_TS = "Veröffentlichungsdatum \n(Audio) ";
     const K_KARTE_TS = "Veröffentlichungsdatum \n(Karte)";
-    // Kart göster: Karte tarihi < yarın (yani bugün veya geçmişte)
-    m1Vocab = m1All.filter(r => {
-      const ts = r[K_KARTE_TS];
-      return typeof ts === "number" && ts < TOMORROW_START;
-    });
-    // Ses çal: Audio tarihi < yarın (yani bugün veya geçmişte)
+
+    // Her kayıta ses ve kart hazır bayraklarını ekle
     m1All.forEach(r => {
-      const ts = r[K_AUDIO_TS];
-      r._audioReady = typeof ts === "number" && ts < TOMORROW_START;
+      const ats = r[K_AUDIO_TS];
+      const kts = r[K_KARTE_TS];
+      r._audioReady = (typeof ats === "number") && (ats < TOMORROW_UTC);
+      r._karteReady = (typeof kts === "number") && (kts < TOMORROW_UTC);
     });
+
+    // Kart görünürlüğü: Karte tarihi geldi mi?
+    m1Vocab = m1All.filter(r => r._karteReady === true);
 
     const allK  = [...new Set(m1All.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
     const openK = [...new Set(m1Vocab.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
@@ -319,7 +320,7 @@ function doAudio() {
 
   // Ön yüz: önce opus, bittikten sonra TTS
   // Ses dosyası henüz yayınlanmamışsa direkt TTS
-  if (item._audioReady === false) {
+  if (item._audioReady !== true) {
     ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
     return;
   }
