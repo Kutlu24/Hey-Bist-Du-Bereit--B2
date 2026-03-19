@@ -77,6 +77,8 @@ async function loadModul1() {
     // Excel tarihleri UTC 00:00:00 olarak kaydedilmiş.
     // "Bugün yayınlandı" = ts < yarının 00:00 UTC
     const _today = new Date();
+    // Yarının 00:00:00 UTC — JSON'daki tarihler günün sonuna (23:59:59.999) ayarlandı
+    // bu yüzden basit < karşılaştırması yeterli
     const TOMORROW_UTC = Date.UTC(
       _today.getUTCFullYear(), _today.getUTCMonth(), _today.getUTCDate() + 1
     );
@@ -85,6 +87,7 @@ async function loadModul1() {
     const K_KARTE_TS = "karte_datum";
 
     // Her kayıta ses ve kart hazır bayraklarını ekle
+    // <= TOMORROW_UTC: tam gece yarısı (00:00:00) kaydedilen tarihleri de yakalar
     m1All.forEach(r => {
       const ats = r[K_AUDIO_TS];
       const kts = r[K_KARTE_TS];
