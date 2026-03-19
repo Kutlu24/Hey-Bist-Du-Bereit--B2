@@ -10,7 +10,7 @@
 <div class="container">
 
   <!-- ══ HAUPTMENÜ ══ -->
-  <div id="page-menu">
+  <div id="page-menu" style="display:block">
     <header class="hero">
       <h1>Sicher! B2 Vokabeltrainer</h1>
       <p class="subtitle">Wähle deinen Lernmodus</p>
@@ -52,7 +52,7 @@
   </div>
 
   <!-- ══ MODUL 1 ══ -->
-  <div id="page-m1" class="hidden">
+  <div id="page-m1" style="display:none">
 
     <div class="m1-topbar">
       <button class="m1-back" onclick="showMenu()">← Menü</button>
@@ -178,10 +178,10 @@
   </div><!-- /page-m1 -->
 
   <!-- ══ MODUL 2 ══ -->
-  <div id="page-m2" class="hidden">
+  <div id="page-m2" style="display:none; width:100%">
 
     <!-- ADIM 1: Dil Seçim Ekranı -->
-    <div id="m2-lang-screen">
+    <div id="m2-lang-screen" style="display:block">
       <div class="m2-lang-header">
         <h2>🌍 Sicher! B2 – Multilingual</h2>
         <p>Wähle deine Muttersprache</p>
@@ -224,7 +224,7 @@
     </div>
 
     <!-- ADIM 2: Ana Uygulama -->
-    <div id="m2-app" class="hidden">
+    <div id="m2-app" style="display:none; width:100%">
 
       <!-- Top bar -->
       <div class="m2-topbar">
@@ -271,8 +271,6 @@
       <div id="m2-flash-area">
         <div class="m2-card" onclick="m2Flip()">
           <button class="fav-btn" id="m2-fav-btn" onclick="event.stopPropagation();m2ToggleFav()">☆</button>
-
-          <!-- Ön yüz -->
           <div class="m2-card-front" id="m2-card-front">
             <div class="m2-card-word" id="m2-de">Wort</div>
             <div class="m2-card-meta">
@@ -280,8 +278,6 @@
             </div>
             <div class="m1-hint" style="margin-top:14px">👆 Klicken zum Umdrehen</div>
           </div>
-
-          <!-- Arka yüz -->
           <div class="m2-card-back hidden" id="m2-card-back">
             <div class="m2-card-word" id="m2-tr">Übersetzung</div>
             <div class="m2-card-translation" id="m2-sent">Beispielsatz...</div>
@@ -290,7 +286,6 @@
             </div>
           </div>
         </div>
-
         <div class="m1-nav" style="margin-top:14px">
           <button class="m1-nbtn back"    onclick="m2Prev()">← Zurück</button>
           <button class="m1-nbtn learned" onclick="m2MarkLearned()">✅ Gelernt</button>
