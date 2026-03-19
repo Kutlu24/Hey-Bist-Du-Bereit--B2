@@ -499,14 +499,12 @@ select{
 #page-m2 { width: 100%; }
 
 #m2-lang-screen {
-  display: flex;
   flex-direction: column;
   align-items: center;
   padding: 30px 16px 40px;
+  /* display JS tarafından yönetilir */
 }
-#m2-lang-screen.hidden { display: none !important; }
-
-#m2-app.hidden { display: none !important; }
+#m2-app { width: 100%; }
 
 .m2-lang-header {
   text-align: center;
@@ -557,7 +555,7 @@ select{
 }
 
 /* ── Ana Uygulama ── */
-#m2-app { width: 100%; }
+
 
 .m2-topbar {
   display: flex;

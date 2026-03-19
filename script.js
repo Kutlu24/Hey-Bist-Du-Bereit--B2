@@ -588,15 +588,15 @@ function m2ChangeLang() {
 function m2ShowApp() {
   const langEl = document.getElementById("m2-lang-screen");
   const appEl  = document.getElementById("m2-app");
-  if (langEl) { langEl.style.setProperty("display", "none", "important"); }
-  if (appEl)  { appEl.style.setProperty("display", "block", "important"); }
+  if (langEl) langEl.style.display = "none";
+  if (appEl)  appEl.style.display  = "block";
 }
 
 function m2ShowLang() {
   const langEl = document.getElementById("m2-lang-screen");
   const appEl  = document.getElementById("m2-app");
-  if (appEl)  { appEl.style.setProperty("display", "none", "important"); }
-  if (langEl) { langEl.style.setProperty("display", "flex", "important"); }
+  if (appEl)  appEl.style.display  = "none";
+  if (langEl) langEl.style.display = "flex";
 }
 
 // ── Oturum Başlat ──
