@@ -74,21 +74,24 @@ async function loadModul1() {
     loadLS();
 
     // Tarih filtresi:
-    // - Karte tarihi <= bugün → kart görünür (kelime listede çıkar)
-    // - Audio tarihi <= bugün → ses dosyası çalınabilir (kart henüz gizli olsa bile)
-    const TODAY_END = (() => { const d=new Date(); d.setHours(23,59,59,999); return d.getTime(); })();
+    // Excel'de tarihler UTC gece yarısı (00:00:00) olarak kaydedilmiş.
+    // Bugünün başlangıcından bir sonraki günün başlangıcına kadar = "bugün" sayılır.
+    // Böylece 19.03 00:00 UTC kaydı, 19.03 günü boyunca görünür olur.
+    const today = new Date();
+    const TOMORROW_START = Date.UTC(
+      today.getFullYear(), today.getMonth(), today.getDate() + 1
+    ); // Yarının 00:00 UTC = bugünün sonu
     const K_AUDIO_TS = "Veröffentlichungsdatum \n(Audio) ";
     const K_KARTE_TS = "Veröffentlichungsdatum \n(Karte)";
-    // Kart göster: Karte tarihi geçmişse
+    // Kart göster: Karte tarihi < yarın (yani bugün veya geçmişte)
     m1Vocab = m1All.filter(r => {
       const ts = r[K_KARTE_TS];
-      return typeof ts === "number" && ts <= TODAY_END;
+      return typeof ts === "number" && ts < TOMORROW_START;
     });
-    // Ses çal: Audio tarihi geçmişse (kart görünmese bile ses hazır)
-    // Bu bilgiyi her kayıtta "audioReady" olarak işaretle
+    // Ses çal: Audio tarihi < yarın (yani bugün veya geçmişte)
     m1All.forEach(r => {
       const ts = r[K_AUDIO_TS];
-      r._audioReady = typeof ts === "number" && ts <= TODAY_END;
+      r._audioReady = typeof ts === "number" && ts < TOMORROW_START;
     });
 
     const allK  = [...new Set(m1All.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
