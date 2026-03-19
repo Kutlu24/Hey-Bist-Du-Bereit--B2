@@ -16,13 +16,6 @@ const K_AUDIO = "ses_dosyasi";
 const K_AUDIO2= "Audio Datei";
 const K_KARTE = "Veröffentlichungsdatum \n(Karte)";
 
-// Bugünün sonu (23:59:59) — saat farkı sorununu çözer
-const TODAY_END = (() => {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d.getTime();
-})();
-
 // ════════════════════════════════════════
 //  MODUL 1 DURUM
 // ════════════════════════════════════════
@@ -80,10 +73,22 @@ async function loadModul1() {
     m1All = await res.json();
     loadLS();
 
-    // Gün bazlı tarih filtresi
+    // Tarih filtresi:
+    // - Karte tarihi <= bugün → kart görünür (kelime listede çıkar)
+    // - Audio tarihi <= bugün → ses dosyası çalınabilir (kart henüz gizli olsa bile)
+    const TODAY_END = (() => { const d=new Date(); d.setHours(23,59,59,999); return d.getTime(); })();
+    const K_AUDIO_TS = "Veröffentlichungsdatum \n(Audio) ";
+    const K_KARTE_TS = "Veröffentlichungsdatum \n(Karte)";
+    // Kart göster: Karte tarihi geçmişse
     m1Vocab = m1All.filter(r => {
-      const ts = r[K_KARTE];
+      const ts = r[K_KARTE_TS];
       return typeof ts === "number" && ts <= TODAY_END;
+    });
+    // Ses çal: Audio tarihi geçmişse (kart görünmese bile ses hazır)
+    // Bu bilgiyi her kayıtta "audioReady" olarak işaretle
+    m1All.forEach(r => {
+      const ts = r[K_AUDIO_TS];
+      r._audioReady = typeof ts === "number" && ts <= TODAY_END;
     });
 
     const allK  = [...new Set(m1All.map(r=>r[K_KAPI]).filter(Boolean))].sort((a,b)=>a-b);
@@ -301,16 +306,25 @@ function doAudio() {
   if (!item) return;
 
   const isFlipped = document.getElementById("m1-card-inner")?.classList.contains("flipped");
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-  // Arka yüz: sadece cümleyi oku
+  // Arka yüz: gramer + cümle oku
   if (isFlipped) {
-    ttsSpeak([item[K_SENT] || ""]);
+    ttsSpeak([item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+    return;
+  }
+
+  // Ön yüz: önce opus, bittikten sonra TTS
+  // Ses dosyası henüz yayınlanmamışsa direkt TTS
+  if (item._audioReady === false) {
+    ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
     return;
   }
 
   const rawFile = item[K_AUDIO] || item[K_AUDIO2] || "";
   const file = rawFile
-    ? (rawFile.startsWith("sesler/") || rawFile.startsWith("http") ? rawFile : "sesler/" + rawFile)
+    ? (rawFile.startsWith("sesler/") || rawFile.startsWith("http")
+        ? rawFile : "sesler/" + rawFile)
     : "";
 
   if (!file) {
@@ -318,36 +332,42 @@ function doAudio() {
     return;
   }
 
-  // Önce fetch ile dosyanın gerçekten var olup olmadığını kontrol et
-  fetch(file, { method: "HEAD" })
-    .then(res => {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      // Dosya var → Audio ile çal
-      const opusEl = document.getElementById("m1-audio");
-      opusEl.src = file;
-      opusEl.type = "audio/ogg; codecs=opus";
-      opusEl.currentTime = 0;
-      opusEl.onended = null;
-      opusEl.onerror = null;
+  const el = document.getElementById("m1-audio");
+  el.pause();
+  el.removeAttribute("src");
+  el.load();
 
-      const afterAudio = () => {
-        ttsSpeak([item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-      };
+  el.src = file;
+  el.currentTime = 0;
+  el.onended = null;
+  el.onerror = null;
 
-      opusEl.onended = afterAudio;
-      opusEl.onerror = () => {
-        // Dosya var ama çalamazsa TTS'ye geç
-        ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-      };
+  let ttsStarted = false;
+  const startTTS = () => {
+    if (ttsStarted) return;
+    ttsStarted = true;
+    ttsSpeak([item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+  };
 
-      opusEl.play().catch(() => {
-        ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
-      });
-    })
-    .catch(() => {
-      // Dosya yok (404 vb.) → TTS ile oku
+  el.onended = startTTS;
+  el.onerror = () => {
+    // Opus çalamazsa direkt TTS
+    if (!ttsStarted) {
+      ttsStarted = true;
       ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+    }
+  };
+
+  el.load();
+  const p = el.play();
+  if (p !== undefined) {
+    p.catch(() => {
+      if (!ttsStarted) {
+        ttsStarted = true;
+        ttsSpeak([item[K_WORT]||"", item[K_GRAMM]||"", item[K_SENT]||""].filter(Boolean));
+      }
     });
+  }
 }
 
 // Metinleri sırayla seslendir — onend zinciri ile güvenli kuyruk
@@ -564,19 +584,19 @@ function m2ChangeLang() {
   }, 100);
 }
 
-// style.display ile kesin göster/gizle — CSS specificity sorununu önler
+// style.display ile kesin göster/gizle — tüm tarayıcılarda çalışır
 function m2ShowApp() {
   const langEl = document.getElementById("m2-lang-screen");
   const appEl  = document.getElementById("m2-app");
-  if (langEl) langEl.style.display = "none";
-  if (appEl)  appEl.style.display  = "block";
+  if (langEl) { langEl.style.setProperty("display", "none", "important"); }
+  if (appEl)  { appEl.style.setProperty("display", "block", "important"); }
 }
 
 function m2ShowLang() {
   const langEl = document.getElementById("m2-lang-screen");
   const appEl  = document.getElementById("m2-app");
-  if (appEl)  appEl.style.display  = "none";
-  if (langEl) langEl.style.display = "flex";
+  if (appEl)  { appEl.style.setProperty("display", "none", "important"); }
+  if (langEl) { langEl.style.setProperty("display", "flex", "important"); }
 }
 
 // ── Oturum Başlat ──
