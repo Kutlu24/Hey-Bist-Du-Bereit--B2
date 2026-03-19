@@ -10,7 +10,7 @@
 <div class="container">
 
   <!-- ══ HAUPTMENÜ ══ -->
-  <div id="page-menu" style="display:block">
+  <div id="page-menu">
     <header class="hero">
       <h1>Sicher! B2 Vokabeltrainer</h1>
       <p class="subtitle">Wähle deinen Lernmodus</p>
@@ -52,7 +52,7 @@
   </div>
 
   <!-- ══ MODUL 1 ══ -->
-  <div id="page-m1" style="display:none">
+  <div id="page-m1" class="hidden">
 
     <div class="m1-topbar">
       <button class="m1-back" onclick="showMenu()">← Menü</button>
@@ -178,10 +178,10 @@
   </div><!-- /page-m1 -->
 
   <!-- ══ MODUL 2 ══ -->
-  <div id="page-m2" style="display:none; width:100%">
+  <div id="page-m2" class="hidden">
 
     <!-- ADIM 1: Dil Seçim Ekranı -->
-    <div id="m2-lang-screen" style="display:block">
+    <div id="m2-lang-screen">
       <div class="m2-lang-header">
         <h2>🌍 Sicher! B2 – Multilingual</h2>
         <p>Wähle deine Muttersprache</p>
@@ -224,9 +224,8 @@
     </div>
 
     <!-- ADIM 2: Ana Uygulama -->
-    <div id="m2-app" style="display:none; width:100%">
+    <div id="m2-app" class="hidden">
 
-      <!-- Top bar -->
       <div class="m2-topbar">
         <div class="m2-topbar-lang">
           <span id="m2-cur-flag">🇹🇷</span>
@@ -239,7 +238,6 @@
         </div>
       </div>
 
-      <!-- Stats glassmorphism -->
       <div class="m2-stats-row">
         <div class="m2-stat-item">📚 Gesamt<strong id="m2-total">0</strong></div>
         <div class="m2-stat-item">✅ Gelernt<strong id="m2-correct">0</strong></div>
@@ -247,12 +245,10 @@
         <div class="m2-stat-item">📊 Score<strong id="m2-pct">0%</strong></div>
       </div>
 
-      <!-- Animasyonlu progress bar -->
       <div class="m2-progress-bar">
         <div class="m2-progress-fill" id="m2-prog-fill" style="width:0%"></div>
       </div>
 
-      <!-- Kontroller -->
       <div class="m2-controls">
         <div class="m2-tabs">
           <button class="m2-tab active" id="m2-tab-flash" onclick="m2SetMode('flash')">📇 Lernkarten</button>
@@ -267,7 +263,7 @@
         </div>
       </div>
 
-      <!-- Lernkarten Modus -->
+      <!-- Lernkarten -->
       <div id="m2-flash-area">
         <div class="m2-card" onclick="m2Flip()">
           <button class="fav-btn" id="m2-fav-btn" onclick="event.stopPropagation();m2ToggleFav()">☆</button>
@@ -293,7 +289,7 @@
         </div>
       </div>
 
-      <!-- Quiz Modus -->
+      <!-- Quiz -->
       <div id="m2-quiz-area" class="hidden">
         <div class="m2-progress-bar" style="margin-bottom:12px">
           <div class="m2-progress-fill" id="m2-quiz-prog" style="width:0%"></div>

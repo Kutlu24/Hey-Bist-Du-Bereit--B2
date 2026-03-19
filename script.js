@@ -170,25 +170,14 @@ function buildM2Menu() {
 function openTrainer(mod) {
   const vocab = mod===1 ? m1Vocab : m2Vocab;
   if (!vocab.length) { alert("Daten noch nicht geladen. Bitte kurz warten."); return; }
-
-  // Menüyü gizle
-  const menuEl = document.getElementById("page-menu");
-  const m1El   = document.getElementById("page-m1");
-  const m2El   = document.getElementById("page-m2");
-  if (menuEl) menuEl.style.display = "none";
-
+  hide("page-menu");
   if (mod===1) {
-    if (m1El) m1El.style.display = "block";
-    if (m2El) m2El.style.display = "none";
+    show("page-m1"); hide("page-m2");
     m1Mode="flash"; syncTabs(); initSession();
   } else {
-    if (m1El) m1El.style.display = "none";
-    if (m2El) m2El.style.display = "block";
-    // Dil seçim ekranı açık, uygulama gizli
-    const langScreen = document.getElementById("m2-lang-screen");
-    const appEl      = document.getElementById("m2-app");
-    if (langScreen) langScreen.style.display = "block";
-    if (appEl)      appEl.style.display      = "none";
+    hide("page-m1"); show("page-m2");
+    // Dil seçim ekranı göster, uygulama gizle
+    show("m2-lang-screen"); hide("m2-app");
   }
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
@@ -197,14 +186,7 @@ function showMenu() {
   const a = document.getElementById("m1-audio");
   if (a) { a.pause(); a.src=""; }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-  const menuEl = document.getElementById("page-menu");
-  const m1El   = document.getElementById("page-m1");
-  const m2El   = document.getElementById("page-m2");
-  if (menuEl) menuEl.style.display = "block";
-  if (m1El)   m1El.style.display   = "none";
-  if (m2El)   m2El.style.display   = "none";
-
+  show("page-menu"); hide("page-m1"); hide("page-m2");
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
@@ -527,27 +509,17 @@ function m2SelectLang(lang, flag, name) {
   m2LangName = name;
   setText("m2-cur-flag", flag);
   setText("m2-cur-name", name);
-
-  // C1 sitesindeki gibi: display ile göster/gizle
-  const langScreen = document.getElementById("m2-lang-screen");
-  const appEl      = document.getElementById("m2-app");
-  if (langScreen) langScreen.style.display = "none";
-  if (appEl)      appEl.style.display      = "block";
-
+  hide("m2-lang-screen");
+  show("m2-app");
   m2Mode = "flash";
   m2SyncTabs();
   m2Init();
-
-  // Sayfanın en üstüne scroll
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
 function m2ChangeLang() {
-  const langScreen = document.getElementById("m2-lang-screen");
-  const appEl      = document.getElementById("m2-app");
-  if (appEl)      appEl.style.display      = "none";
-  if (langScreen) langScreen.style.display = "block";
-
+  hide("m2-app");
+  show("m2-lang-screen");
   setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50);
 }
 
