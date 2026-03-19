@@ -89,10 +89,8 @@ async function loadModul1() {
     const K_AUDIO_TS = "audio_datum";
     const K_KARTE_TS = "karte_datum";
 
-    // JSON'daki tarihler 00:00:00 UTC olarak kaydedilmiş
-    // "Bugün yayınlandı" = ts === TODAY_UTC_START (tam bugün)
-    // "Daha önce yayınlandı" = ts < TODAY_UTC_START
-    // Yani: ts <= TODAY_UTC_START → bugün veya geçmişte
+    // JSON'daki tarihler 00:00:00 UTC (günün başı)
+    // "Bugün veya geçmişte" = ts <= TODAY_UTC_START (bugünün 00:00:00 ile eşit veya küçük)
     m1All.forEach(r => {
       const ats = r[K_AUDIO_TS];
       const kts = r[K_KARTE_TS];
